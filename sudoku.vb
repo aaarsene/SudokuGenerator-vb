@@ -102,8 +102,8 @@ Class Sudoku
 
     For r As Integer = 0 To Me.Size - 1
       For c As Integer = 0 To Me.Size - 1
-        If r >= Math.Floor(row/3)*Me.SquareSize() And r < Math.Floor(((row/3)+1))*Me.SquareSize() Then
-          If c >= Math.Floor(col/3)*Me.SquareSize() And c < Math.Floor(((col/3)+1))*Me.SquareSize() Then
+        If r >= Math.Floor(row/Me.SquareSize())*Me.SquareSize() And r < Math.Floor(((row/Me.SquareSize())+1))*Me.SquareSize() Then
+          If c >= Math.Floor(col/Me.SquareSize())*Me.SquareSize() And c < Math.Floor(((col/Me.SquareSize())+1))*Me.SquareSize() Then
             If value = Me.Grid(r,c) Then
               Return True
             End If
