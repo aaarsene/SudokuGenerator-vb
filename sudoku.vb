@@ -4,14 +4,41 @@ Imports System.Collections.Generic
 Class Sudoku
   Private Size As Integer
   Private Grid(,) As Integer
+  Private Revealed(,) As Boolean
   Private History As New List(Of Tuple(Of Integer, Integer, List(Of Integer)))
 
   Sub New(ByVal size As Integer)
     Me.Size = size
     ReDim Me.Grid(size-1,size-1)
+    ReDim Me.Revealed(size-1,size-1)
     Me.ClearGrid()
     Me.Generate()
   End Sub
+
+  Public Sub Display()
+  Console.WriteLine()
+  For row As Integer = 0 To Me.Size - 1
+    Console.Write(" ")
+    For col As Integer = 0 To Me.Size - 1
+      If Me.Revealed(row,col) Then
+        Console.Write(Me.Grid(row,col))
+      Else
+        Console.Write("#")
+      End If
+      If col Mod Me.SquareSize() = Me.SquareSize()-1 Then
+        Console.Write(" ")
+      End If
+    Next
+    If row Mod Me.SquareSize() = Me.SquareSize()-1 Then
+      Console.WriteLine()
+    End If
+    Console.WriteLine()
+  Next
+  End Sub
+
+
+
+  'Fonctions pour générer la grille
 
   Public Sub Generate()
     While Me.Zeros()
@@ -161,22 +188,32 @@ Class Sudoku
     Return Math.Sqrt(Me.Size)
   End Function
 
-  Public Sub Display()
-  Console.WriteLine()
-  For row As Integer = 0 To Me.Size - 1
-    Console.Write(" ")
-    For col As Integer = 0 To Me.Size - 1
-      Console.Write(Me.Grid(row,col))
-      If col Mod Me.SquareSize() = Me.SquareSize()-1 Then
-        Console.Write(" ")
-      End If
+
+
+  'Fonctions pour pouvoir jouer avec la grille
+  Public Sub RevealAll()
+    For row As Integer = 0 To Me.Size - 1
+      For col As Integer = 0 To Me.Size - 1
+        Me.Revealed(row,col) = True
+      Next
     Next
-    If row Mod Me.SquareSize() = Me.SquareSize()-1 Then
-      Console.WriteLine()
-    End If
-    Console.WriteLine()
-  Next
   End Sub
+
+  Public Sub Reveal(ByVal count As Integer) 'TODO Refaire ça mieux
+    If count <= Me.Size*Me.Size Then
+      Dim col As Integer
+      Dim row As Integer
+      For i As Integer = 1 To count
+        Do
+          col = Me.GetRandom(0,Me.Size-1)
+          row = Me.GetRandom(0,Me.Size-1)
+        Loop While Me.Revealed(col,row) = True
+        Me.Revealed(col,row) = True
+      Next
+    End If
+  End Sub
+
+  'Fonctions pour générer de l'aléatoire
 
   Private Function GetRandom(ByVal Min As Integer, ByVal Max As Integer) As Integer
     Static Generator As System.Random = New System.Random()
