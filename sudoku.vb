@@ -5,12 +5,14 @@ Class Sudoku
   Private Size As Integer
   Private Grid(,) As Integer
   Private Revealed(,) As Boolean
+  Private UserGrid(,) As Integer
   Private History As New List(Of Tuple(Of Integer, Integer, List(Of Integer)))
 
   Sub New(ByVal size As Integer)
     Me.Size = size
     ReDim Me.Grid(size-1,size-1)
     ReDim Me.Revealed(size-1,size-1)
+    ReDim Me.UserGrid(size-1,size-1)
     Me.ClearGrid()
     Me.Generate()
   End Sub
@@ -22,8 +24,14 @@ Class Sudoku
     For col As Integer = 0 To Me.Size - 1
       If Me.Revealed(row,col) Then
         Console.Write(Me.Grid(row,col))
+      Else If Me.UserGrid(row,col) > 0 Then
+        Console.ForegroundColor = ConsoleColor.White
+        Console.Write(Me.UserGrid(row,col))
+        Console.ResetColor()
       Else
+        Console.ForegroundColor = ConsoleColor.DarkGray
         Console.Write("#")
+        Console.ResetColor()
       End If
       If col Mod Me.SquareSize() = Me.SquareSize()-1 Then
         Console.Write(" ")
@@ -199,19 +207,53 @@ Class Sudoku
     Next
   End Sub
 
-  Public Sub Reveal(ByVal count As Integer) 'TODO Refaire ça mieux
-    If count <= Me.Size*Me.Size Then
-      Dim col As Integer
-      Dim row As Integer
+  Public Sub Reveal(ByVal count As Integer)
+    If count <= Me.Size*Me.Size Or count >= 17 Then
       For i As Integer = 1 To count
-        Do
-          col = Me.GetRandom(0,Me.Size-1)
-          row = Me.GetRandom(0,Me.Size-1)
-        Loop While Me.Revealed(col,row) = True
-        Me.Revealed(col,row) = True
+        Dim cell As Tuple(Of Integer, Integer) = Me.GetRandomHidden()
+        Me.Revealed(cell.Item1,cell.Item2) = True
       Next
     End If
   End Sub
+
+  Private Function GetRandomHidden() As Tuple(Of Integer, Integer)
+    Dim hidden As New List(Of Tuple(Of Integer, Integer))
+    For r As Integer = 0 To Me.Size - 1
+    For c As Integer = 0 To Me.Size - 1
+      If Not Me.Revealed(r,c) Then
+        Dim cell As Tuple(Of Integer, Integer) _
+              = New Tuple(Of Integer, Integer) _
+                (r,c)
+        hidden.Add(cell)
+      End If
+    Next
+    Next
+    Return hidden(Me.GetRandom(0,hidden.Count-1))
+  End Function
+
+  Public Sub AddUserNumber(ByVal row As Integer, _
+                            ByVal col As Integer, _
+                            ByVal value As Integer)
+
+    If Me.Revealed(row-1,col-1) Then
+      Console.WriteLine("Cette case est déjà révélée")
+    Else If Me.Grid(row-1,col-1) <> value Then
+      Console.WriteLine("Ce mouvement n'est pas autorisé")
+    Else
+      Me.UserGrid(row-1,col-1) = value
+    End If
+  End Sub
+
+  Public Function Solved() As Boolean
+    For row As Integer = 0 To Me.Size - 1
+      For col As Integer = 0 To Me.Size - 1
+        If Me.Revealed(row,col) = False And Me.UserGrid(row,col) = 0 Then
+          Return False
+        End If
+      Next
+    Next
+    Return True
+  End Function
 
   'Fonctions pour générer de l'aléatoire
 
